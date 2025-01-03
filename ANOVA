@@ -1,0 +1,29 @@
+import pandas as pd
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+df = pd.read_excel('消费水平v2.xlsx')
+
+model = ols('消费水平编码 ~ C(生源地编码) + C(性别编码) + C(年龄段编码)', data=df).fit()
+
+anova_results = sm.stats.anova_lm(model, typ=2)
+print("ANOVA方差分析结果：")
+print(anova_results)
+print("\n因素显著性判断：")
+for index, row in anova_results.iterrows():
+    if index != 'Residual':
+        factor = index
+        PR_F = row['PR(>F)']
+        if pd.isna(PR_F):
+            print(f"{factor} 的p-value为 nan，不进行原假设检验。")
+        elif PR_F < 0.05:
+            print(f"{factor} 的p-value为 {PR_F:.4f}，小于0.05，拒绝原假设，该因素对结果有显著影响。")
+        else:
+            print(f"{factor} 的p-value为 {PR_F:.4f}，大于等于0.05，不拒绝原假设，该因素对结果没有显著影响。")
+tukey = pairwise_tukeyhsd(endog=df['消费水平编码'], groups=df['生源地编码'], alpha=0.5)
+
+print("\n生源地间的多重比较（LSD procedure）结果：")
+print(tukey)
+
+tukey_results = tukey.summary()
