@@ -1,0 +1,43 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import scipy.stats
+import statsmodels.stats.weightstats
+s = pd.read_excel("C:\\Users\\14418\\Desktop\\293934587_按文本_大学生消费水平_77_77.xlsx")
+data=s['您的每月消费水平?']
+datalist=[]
+for i in data:
+    if i not in datalist:
+        datalist.append(i)
+result=data
+result_dic={}
+for item_str in result:
+    if item_str not in result_dic:
+        result_dic[item_str]=1
+    else:
+        result_dic[item_str]+=1
+keys=result_dic.values()
+print(datalist)
+ 
+df = pd.DataFrame(keys, columns =['value'])
+
+plt.style.use('ggplot')
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+plt.rcParams['axes.unicode_minus']=False
+
+plt.bar(datalist,keys)
+plt.xlabel('consumption level')
+plt.ylabel('frequency')
+plt.title('Consumption level distribution')
+
+
+
+u = df['value'].mean()
+# 计算标准差
+std = df['value'].std()  # 计算标准差
+
+
+print(scipy.stats.kstest(df['value'], 'norm', (u, std)))
+print('pvalue大于0.05可以认为满足正态分布')
+plt.show()
